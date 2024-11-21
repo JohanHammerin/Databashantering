@@ -6,10 +6,7 @@ public class JDBCUtil {
 
     public static String getDatabaseProductName(Connection connection) throws SQLException {
         DatabaseMetaData metadata = connection.getMetaData();
-
         return metadata.getDatabaseProductName();
-
-
     }
 
     public static Connection getConnection() throws SQLException {

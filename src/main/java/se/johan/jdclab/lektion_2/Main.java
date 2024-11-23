@@ -1,5 +1,7 @@
-package se.johan.jdclab;
+package se.johan.jdclab.lektion_2;
 
+
+import se.johan.jdclab.util.JDBCUtil;
 
 import java.sql.*;
 

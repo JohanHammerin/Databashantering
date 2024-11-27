@@ -1,4 +1,4 @@
-package se.johan.jdclab.util;
+package se.johan.jdbclab.util;
 
 import java.sql.*;
 
@@ -10,21 +10,26 @@ public class JDBCUtil {
     }
 
     public static Connection getConnection() throws SQLException {
-//skapa upp en instans av hsql:s jdbcDriver-klass
-        Driver hsqlDriver = new org.hsqldb.jdbcDriver();
-//registrera drivern hos klassen DriverManager
-        DriverManager.registerDriver(hsqlDriver);
-//Skapa en URL till databasen
-        String dbURL = "jdbc:hsqldb:hsql://localhost/jdbclab";
-//Default användarnamn
-        String userId = "sa";
-//Default password
-        String password = "";
-//Använd metoden getConnection i DriverManager för att få en anslutning till databasen
+        // Registrera MySQL JDBC-drivrutinen
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("MySQL JDBC Driver not found", e);
+        }
+
+        // Skapa en URL till MySQL-databasen
+        String dbURL = "jdbc:mysql://localhost:3306/jdbclab";
+        // Ange användarnamn och lösenord
+        String userId = "root"; // Använd ditt användarnamn för MySQL
+        String password = "password";  // Använd ditt lösenord för MySQL
+
+        // Använd metoden getConnection i DriverManager för att få en anslutning till databasen
         Connection conn = DriverManager.getConnection(dbURL, userId, password);
-//Sätt autoCommit till false
+
+        // Sätt autoCommit till false för explicit transaktionshantering
         conn.setAutoCommit(false);
-//returnera anslutningen
+
+        // Returnera anslutningen
         return conn;
     }
 
@@ -37,7 +42,6 @@ public class JDBCUtil {
             e.printStackTrace();
         }
     }
-
 
     public static void closeStatement(Statement stmt) {
         try {
@@ -59,7 +63,6 @@ public class JDBCUtil {
         }
     }
 
-
     public static void commit(Connection conn) {
         try {
             if (conn != null) {
@@ -79,8 +82,4 @@ public class JDBCUtil {
             e.printStackTrace();
         }
     }
-
-
-
-
 }

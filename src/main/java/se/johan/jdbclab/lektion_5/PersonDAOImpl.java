@@ -1,6 +1,6 @@
-package se.johan.jdclab.lektion_5;
+package se.johan.jdbclab.lektion_5;
 
-import se.johan.jdclab.util.JDBCUtil;
+import se.johan.jdbclab.util.JDBCUtil;
 
 import java.sql.*;
 
@@ -15,7 +15,7 @@ public class PersonDAOImpl implements PersonDAO {
     public void insertPerson(Person person) throws SQLException {
         try {
             connect();
-            String sql = "INSERT INTO PERSON(first_name, last_name, gender, dob, income) VALUES (?,?,?,?,?)";
+            String sql = "INSERT INTO Person(first_name, last_name, gender, dob, income) VALUES (?,?,?,?,?)";
             preparedStatement = connection.prepareStatement(sql);
 
             preparedStatement.setString(1, person.getFirstName());
@@ -62,7 +62,6 @@ public class PersonDAOImpl implements PersonDAO {
     public void selectAll() {
         try {
             connect();
-
             String sql = "SELECT * FROM Person";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -89,6 +88,13 @@ public class PersonDAOImpl implements PersonDAO {
     }
 
     private void printInfoAboutPerson(ResultSet resultSet) throws SQLException {
+
+        if (!resultSet.next()) {
+            System.out.println("No data found");
+            return;
+        }
+
+
         while (resultSet.next()) {
             int id = resultSet.getInt("person_id");
             String firstName = resultSet.getString("first_name");

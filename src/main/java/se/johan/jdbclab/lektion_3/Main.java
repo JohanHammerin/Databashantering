@@ -1,6 +1,6 @@
-package se.johan.jdclab.lektion_3;
+package se.johan.jdbclab.lektion_3;
 
-import se.johan.jdclab.util.*;
+import se.johan.jdbclab.util.*;
 
 import java.sql.*;
 

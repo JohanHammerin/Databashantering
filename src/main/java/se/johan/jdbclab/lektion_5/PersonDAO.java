@@ -1,4 +1,4 @@
-package se.johan.jdclab.lektion_5;
+package se.johan.jdbclab.lektion_5;
 
 import java.sql.*;
 

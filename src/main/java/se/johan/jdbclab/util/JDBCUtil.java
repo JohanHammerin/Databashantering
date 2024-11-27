@@ -82,4 +82,10 @@ public class JDBCUtil {
             e.printStackTrace();
         }
     }
+
+    public static void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
+        JDBCUtil.closeResultSet(rs);
+        JDBCUtil.closeStatement(pstmt);
+        JDBCUtil.closeConnection(conn);
+    }
 }

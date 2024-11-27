@@ -34,7 +34,7 @@ public class PersonDAOImpl implements PersonDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            close(connection, preparedStatement, resultSet);
+            JDBCUtil.close(connection, preparedStatement, resultSet);
         }
     }
 
@@ -53,7 +53,7 @@ public class PersonDAOImpl implements PersonDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            close(connection, preparedStatement, resultSet);
+            JDBCUtil.close(connection, preparedStatement, resultSet);
         }
     }
 
@@ -72,15 +72,10 @@ public class PersonDAOImpl implements PersonDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            close(connection, preparedStatement, resultSet);
+            JDBCUtil.close(connection, preparedStatement, resultSet);
         }
     }
 
-    private void close(Connection connection, PreparedStatement preparedStatement, ResultSet resultSet) {
-        JDBCUtil.closeResultSet(resultSet);
-        JDBCUtil.closeStatement(preparedStatement);
-        JDBCUtil.closeConnection(connection);
-    }
 
     private void connect() throws SQLException {
         connection = JDBCUtil.getConnection();

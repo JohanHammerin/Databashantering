@@ -9,6 +9,24 @@ public class House {
     private double price;
     private int personId;
 
+    //Constructors
+    House(int houseId, String address, String city, String postalCode, double price, int personId) {
+        setHouseId(houseId);
+        setAddress(address);
+        setCity(city);
+        setPostalCode(postalCode);
+        setPrice(price);
+        setPersonId(personId);
+    }
+
+    House(String address, String city, String postalCode, double price, int personId) {
+        setAddress(address);
+        setCity(city);
+        setPostalCode(postalCode);
+        setPrice(price);
+        setPersonId(personId);
+    }
+
 
     //Getters & Setters
     public int getHouseId() {

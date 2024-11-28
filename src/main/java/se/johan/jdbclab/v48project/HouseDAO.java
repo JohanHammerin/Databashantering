@@ -2,5 +2,7 @@ package se.johan.jdbclab.v48project;
 
 public interface HouseDAO {
     void insertHouse(House house);
-    void selectAllFromCity(String city);
+    void selectAllHouseFromCity(String city);
+    void selectAllFromHouse();
+    void selectAllFromHouseAndPerson(Person person);
 }

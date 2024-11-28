@@ -33,6 +33,7 @@ public class PersonDAOImpl implements PersonDAO {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            JDBCUtil.rollback(connection);
         } finally {
             JDBCUtil.close(connection, preparedStatement, resultSet);
         }
@@ -52,6 +53,7 @@ public class PersonDAOImpl implements PersonDAO {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            JDBCUtil.rollback(connection);
         } finally {
             JDBCUtil.close(connection, preparedStatement, resultSet);
         }
@@ -71,6 +73,7 @@ public class PersonDAOImpl implements PersonDAO {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            JDBCUtil.rollback(connection);
         } finally {
             JDBCUtil.close(connection, preparedStatement, resultSet);
         }

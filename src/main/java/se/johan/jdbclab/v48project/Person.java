@@ -8,24 +8,27 @@ public class Person {
     private int personId;
     private String firstName;
     private String lastName;
+    private String email;
     private String gender;
     private java.sql.Date dob;
     private double income;
 
 
     //Constructors
-    Person(int personID, String firstName, String lastName, String gender, Date dob, double income) {
+    Person(int personID, String firstName, String lastName, String email, String gender, Date dob, double income) {
         setPersonId(personId);
         setFirstName(firstName);
         setLastName(lastName);
+        setEmail(email);
         setGender(gender);
         setDob(dob);
         setIncome(income);
     }
 
-    Person(String firstName, String lastName, String gender, Date dob, double income) {
+    Person(String firstName, String lastName, String email, String gender, Date dob, double income) {
         setFirstName(firstName);
         setLastName(lastName);
+        setEmail(email);
         setGender(gender);
         setDob(dob);
         setIncome(income);
@@ -55,6 +58,14 @@ public class Person {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getGender() {

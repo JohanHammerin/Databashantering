@@ -1,8 +1,9 @@
 package se.johan.jdbclab.v48project;
 
+import se.johan.jdbclab.v48project.gui.LoginGUI;
+
 import java.sql.Date;
 import java.sql.SQLException;
-
 
 
 public class Main {
@@ -10,17 +11,18 @@ public class Main {
         PersonDAO personDAO = new PersonDAOImpl();
         HouseDAO houseDAO = new HouseDAOImpl();
 
+        new LoginGUI().createLoginGui();
+
         // Skapa och lägg till personen
-        Person firstPerson = new Person("Johan", "Hammerin", "M", Date.valueOf("2004-01-03"), 13156);
+        //Person firstPerson = new Person("Johan", "Hammerin", "Johan04hammerin@gmail.com", "M", Date.valueOf("2004-01-03"), 13156);
         //personDAO.insertPerson(firstPerson);
+        //personDAO.selectAllPerson();
 
         // Använd det genererade person_id för att skapa huset
-        House firstHouse = new House("Sandalmakarbacken 9", "Hägersten", "12639", 10, 3);
+        //House firstHouse = new House("Sandalmakarbacken 9", "Hägersten", "12639", 10, 1);
         //houseDAO.insertHouse(firstHouse);
-        //houseDAO.selectAllFromHouse();
+        //houseDAO.selectAllFromHouseAndPerson(1);
 
-        firstPerson.setPersonId(3);
 
-        houseDAO.selectAllFromHouseAndPerson(firstPerson);
     }
 }

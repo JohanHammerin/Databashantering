@@ -4,5 +4,5 @@ public interface HouseDAO {
     void insertHouse(House house);
     void selectAllHouseFromCity(String city);
     void selectAllFromHouse();
-    void selectAllFromHouseAndPerson(Person person);
+    void selectAllFromHouseAndPerson(int personId);
 }

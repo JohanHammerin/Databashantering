@@ -109,25 +109,24 @@ public class HouseDAOImpl implements HouseDAO {
 
 
     @Override
-    public void selectAllFromHouseAndPerson(Person person) {
+    public void selectAllFromHouseAndPerson(int personId) {
         try {
             conn = JDBCUtil.getConnection();
 
             String sql = "SELECT * FROM House INNER JOIN Person ON House.person_id = Person.person_id WHERE Person.person_id = ?";
 
             pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, person.getPersonId());
+            pstmt.setInt(1, personId);
 
             rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                int personID = rs.getInt("person_id");
                 String firstName = rs.getString("first_name");
                 String lastName = rs.getString("last_name");
                 String address = rs.getString("address");
                 String city = rs.getString("city");
 
-                System.out.println("Name: " + firstName + " " + lastName + ":\n" + "address: " + address + "\ncity: " + city);
+                System.out.println("Name: " + firstName + " " + lastName + "\n" + "address: " + address + "\ncity: " + city);
                 System.out.println("_".repeat(50));
             }
 

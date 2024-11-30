@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
 
+import se.johan.jdbclab.v48project.logic.Security;
+
 public class LoginGUI {
 
     Connection conn = null;
@@ -53,7 +55,7 @@ public class LoginGUI {
         logInButton.setBorder(new RoundedBorder(15));
         logInButton.setFont(buttonFont);
         logInButton.addActionListener(_ -> {
-            if (checkForThreat(emailTextField.getText()) || checkForThreat(firstNameTextField.getText()) || checkForThreat(lastNameTextField.getText())) {
+            if (Security.checkForThreat(emailTextField.getText()) || Security.checkForThreat(firstNameTextField.getText()) || Security.checkForThreat(lastNameTextField.getText())) {
                 errorLabel.setText("Fälten får inte innehålla [*, ', =]");
 
                 //new MainGUI(emailTextField.getText(), firstNameTextField.getText(), lastNameTextField.getText());
@@ -88,12 +90,4 @@ public class LoginGUI {
     }
 
 
-    private boolean checkForThreat(String input) {
-        return (input.contains("*") || input.contains("'") || input.contains("=") || input.contains("!"));
-    }
-
-
-    private boolean checkThatUserExists (String email, String firstName, String lastName) {
-
-    }
 }

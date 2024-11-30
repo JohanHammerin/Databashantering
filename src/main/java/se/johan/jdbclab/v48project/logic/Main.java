@@ -1,8 +1,11 @@
-package se.johan.jdbclab.v48project;
+package se.johan.jdbclab.v48project.logic;
 
 import se.johan.jdbclab.v48project.gui.LoginGUI;
+import se.johan.jdbclab.v48project.bös.HouseDAO;
+import se.johan.jdbclab.v48project.bös.HouseDAOImpl;
+import se.johan.jdbclab.v48project.bös.PersonDAO;
+import se.johan.jdbclab.v48project.bös.PersonDAOImpl;
 
-import java.sql.Date;
 import java.sql.SQLException;
 
 

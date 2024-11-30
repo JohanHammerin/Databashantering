@@ -1,4 +1,4 @@
-package se.johan.jdbclab.v48project;
+package se.johan.jdbclab.v48project.bös;
 
 import se.johan.jdbclab.util.JDBCUtil;
 

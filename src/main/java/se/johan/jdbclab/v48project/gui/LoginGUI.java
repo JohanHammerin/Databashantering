@@ -2,8 +2,13 @@ package se.johan.jdbclab.v48project.gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.*;
 
 public class LoginGUI {
+
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
 
     public void createLoginGui() {
         // Skapa huvudfönstret
@@ -33,25 +38,43 @@ public class LoginGUI {
         upperPanel.add(new JLabel("Last Name:"));
         JTextField lastNameTextField = new JTextField();
         lastNameTextField.setBorder(new RoundedBorder(15));
-
         upperPanel.add(lastNameTextField);
 
 
         JPanel lowerPanel = new JPanel();
-        lowerPanel.setLayout(new GridLayout(4,1,10,10));
+        lowerPanel.setLayout(new GridLayout(4, 1, 10, 10));
+
+        JLabel errorLabel = new JLabel("");
+        errorLabel.setForeground(Color.RED);
+        lowerPanel.add(errorLabel);
 
         //Logga in
         JButton logInButton = new JButton("Logga in");
         logInButton.setBorder(new RoundedBorder(15));
         logInButton.setFont(buttonFont);
+        logInButton.addActionListener(_ -> {
+            if (checkForThreat(emailTextField.getText()) || checkForThreat(firstNameTextField.getText()) || checkForThreat(lastNameTextField.getText())) {
+                errorLabel.setText("Fälten får inte innehålla [*, ', =]");
+
+                //new MainGUI(emailTextField.getText(), firstNameTextField.getText(), lastNameTextField.getText());
+            } else {
+                errorLabel.setText("");
+
+            }
+        });
+
         lowerPanel.add(logInButton);
 
         //Skapa konto
         JButton createAccountButton = new JButton("Skapa konto");
         createAccountButton.setBorder(new RoundedBorder(15));
         createAccountButton.setFont(buttonFont);
-        lowerPanel.add(createAccountButton);
 
+        createAccountButton.addActionListener(_ -> {
+            new CreateAccountGUI();
+        });
+
+        lowerPanel.add(createAccountButton);
 
 
         // Lägg till panelen i frame
@@ -62,5 +85,15 @@ public class LoginGUI {
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
         frame.setVisible(true);
+    }
+
+
+    private boolean checkForThreat(String input) {
+        return (input.contains("*") || input.contains("'") || input.contains("=") || input.contains("!"));
+    }
+
+
+    private boolean checkThatUserExists (String email, String firstName, String lastName) {
+
     }
 }

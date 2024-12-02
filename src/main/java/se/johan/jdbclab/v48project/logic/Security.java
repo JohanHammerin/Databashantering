@@ -1,24 +1,44 @@
 package se.johan.jdbclab.v48project.logic;
 
 import se.johan.jdbclab.util.JDBCUtil;
+import se.johan.jdbclab.v48project.gui.*;
 
+import javax.swing.*;
 import java.sql.*;
 
+
 public class Security {
-    Connection conn = null;
-    PreparedStatement pstmt = null;
-    ResultSet rs = null;
+
 
     public static boolean checkForThreat(String input) {
-        return (input.contains("*") || input.contains("'") || input.contains("=") || input.contains("!"));
+        String[] threatCharacters = {"*", "'", "\"", ";", "--", "#", "=", "(", ")", "<", ">", "NULL", "UNION", "SELECT", "INSERT", "DROP", "EXEC", "0x"};
+        for (String threat : threatCharacters) {
+            if (input.toUpperCase().contains(threat)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public boolean checkThatUserExists(String email, String firstName, String lastName) {
+    public static boolean checkThatUserExists(Connection conn, PreparedStatement pstmt, ResultSet rs, String email, String firstName, String lastName) {
+        boolean userExists = false;
 
         try {
             conn = JDBCUtil.getConnection();
-            String sql = "SELECT person_id WHERE email = ? && first_name = ? && last_name ?";
+            String sql = "SELECT person_id FROM Person WHERE email = ? AND first_name = ? AND last_name = ?";
+            pstmt = conn.prepareStatement(sql);
 
+            pstmt.setString(1, email);
+            pstmt.setString(2, firstName);
+            pstmt.setString(3, lastName);
+
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                int personId = rs.getInt("person_id");
+                userExists = true;
+                new MainGUI(personId);
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -26,6 +46,10 @@ public class Security {
         } finally {
             JDBCUtil.close(conn, pstmt, rs);
         }
-        return false;
+        return userExists;
+    }
+
+    public static boolean checkForBlancField(String input) {
+        return input.isBlank();
     }
 }

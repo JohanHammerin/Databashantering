@@ -15,28 +15,29 @@ public class LoginGUI {
 
     public void createLoginGui() {
         // Skapa huvudfönstret
-        JFrame frame = new JFrame("Fastighetskollen");
+        JFrame frame = new JFrame("Fastigheter");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 500);
 
-        //Skapa en upperPanel med FlowLayout
+        //UpperPanel
         JPanel upperPanel = new JPanel();
-        upperPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        UtilGui.createUpperPanel(upperPanel);
 
-
-        // Skapa en centerPanel med en GridLayout
+        //CenterPanel
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new GridLayout(7, 1, 10, 10)); // För mindre vertikalt mellanrum mellan raderna
+        centerPanel.setLayout(new GridLayout(8, 1, 10, 10)); // För mindre vertikalt mellanrum mellan raderna
+
+        //LowerPanel
+        JPanel lowerPanel = new JPanel();
+        UtilGui.createLowerPanel(lowerPanel);
 
         //Typsnitt
         Font buttonFont = new Font("SF Pro", Font.BOLD, 14); // Större font för knapparna
-        Font headerFont = new Font("SF Pro", Font.BOLD, 14);
         Font mainFont = new Font("SF Pro", Font.PLAIN, 14);
 
         //HeaderLabel
         JLabel headerLabel = new JLabel("Login");
-        headerLabel.setFont(headerFont);
-        upperPanel.add(headerLabel);
+        UtilGui.createHeaderLabel(headerLabel, upperPanel, buttonFont);
 
 
         // Skapa och lägg till etiketter och textfält
@@ -66,18 +67,25 @@ public class LoginGUI {
         JTextField lastNameTextField = new JTextField();
         centerPanel.add(lastNameTextField);
 
-
-        JPanel lowerPanel = new JPanel();
-        lowerPanel.setLayout(new GridLayout(4, 1, 10, 10));
-
         JLabel errorLabel = new JLabel("");
         errorLabel.setForeground(Color.RED);
         lowerPanel.add(errorLabel);
 
 
+        // Skapa konto
+        JButton createAccountButton = new JButton("Skapa konto");
+        createAccountButton.setFont(buttonFont);
+        lowerPanel.add(createAccountButton);
+        createAccountButton.addActionListener(_ -> {
+            new CreateAccountGUI().createCreateAccountGUI(); // Öppna nytt GUI
+            frame.dispose(); // Stäng nuvarande fönster helt
+        });
+
+
         // Logga in
         JButton logInButton = new JButton("Logga in");
         logInButton.setFont(buttonFont);
+        lowerPanel.add(logInButton);
         logInButton.addActionListener(_ -> {
             String email = emailTextField.getText();
             String firstName = firstNameTextField.getText();
@@ -85,7 +93,7 @@ public class LoginGUI {
 
             if (!Security.checkForBlancField(email) && !Security.checkForBlancField(firstName) && !Security.checkForBlancField(lastName)) {
                 if (Security.checkForThreat(email) || Security.checkForThreat(firstName) || Security.checkForThreat(lastName)) {
-                    errorLabel.setText("Fälten får inte innehålla luriga tecken😳");
+                    errorLabel.setText("Farliga tecken!");
                 } else {
                     errorLabel.setText("");
                     if (!Security.checkThatUserExists(conn, pstmt, rs, email, firstName, lastName)) {
@@ -105,19 +113,8 @@ public class LoginGUI {
         });
 
 
-        lowerPanel.add(logInButton);
-
-        // Skapa konto
-        JButton createAccountButton = new JButton("Skapa konto");
-        createAccountButton.setFont(buttonFont);
-
-        createAccountButton.addActionListener(_ -> new CreateAccountGUI());
-
-        lowerPanel.add(createAccountButton);
-
-
         // Lägg till panelen i frame
-        frame.add(upperPanel, BorderLayout. NORTH);
+        frame.add(upperPanel, BorderLayout.NORTH);
         frame.add(centerPanel, BorderLayout.CENTER);
         frame.add(lowerPanel, BorderLayout.SOUTH);
 
@@ -132,4 +129,8 @@ public class LoginGUI {
         frame.setResizable(false);
         frame.setVisible(true);
     }
+
+
+
 }
+

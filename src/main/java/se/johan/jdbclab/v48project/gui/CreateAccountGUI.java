@@ -1,7 +1,5 @@
 package se.johan.jdbclab.v48project.gui;
 
-import se.johan.jdbclab.util.JDBCUtil;
-
 import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
@@ -35,7 +33,28 @@ public class CreateAccountGUI {
         JLabel headerLabel = new JLabel("Skapa konto");
         UtilGui.createHeaderLabel(headerLabel, upperPanel, buttonFont);
 
+        //Förnamn
+        JLabel firstNameLabel = new JLabel("Förnamn");
+        firstNameLabel.setFont(mainFont);
+        centerPanel.add(firstNameLabel);
 
+        JTextField firstNameTextField = new JTextField();
+        centerPanel.add(firstNameTextField);
+        //Efternamn
+        JLabel lastNameLabel = new JLabel("Efternamn");
+        lastNameLabel.setFont(mainFont);
+        centerPanel.add(lastNameLabel);
+
+        JTextField lastNameTextField = new JTextField();
+        centerPanel.add(lastNameTextField);
+
+        //Mail
+        JLabel mailLabel = new JLabel("Mail");
+        mailLabel.setFont(mainFont);
+        centerPanel.add(mailLabel);
+
+        JTextField mailTextField = new JTextField();
+        centerPanel.add(mailTextField);
 
 
 

@@ -88,4 +88,10 @@ public class JDBCUtil {
         JDBCUtil.closeStatement(pstmt);
         JDBCUtil.closeConnection(conn);
     }
+
+    public static void close(Connection conn, PreparedStatement pstmt) {
+        JDBCUtil.closeStatement(pstmt);
+        JDBCUtil.closeConnection(conn);
+
+    }
 }

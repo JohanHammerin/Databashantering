@@ -9,10 +9,10 @@ public interface WorkRoleAndEmployeeDAO {
     void createNewWorkRole(Connection conn, PreparedStatement pstmt, ResultSet rs, String title, String workDescription, double salary, Date creationDate);
     void deleteWorkRole(Connection conn, PreparedStatement pstmt, ResultSet rs, String title);
     void showAllWorkRoles(Connection conn, PreparedStatement pstmt, ResultSet rs);
-    void updateWorkRole(Connection conn, PreparedStatement pstmt, ResultSet rs, String title, String workDescription, double salary, Date creationDate);
+    void updateWorkRole(Connection conn, PreparedStatement pstmt, String title, String workDescription, double salary, Date creationDate, int workId);
 
     //Employee
-    void createNewEmployee(Connection conn, PreparedStatement pstmt, ResultSet rs, String fullName, String email, String employeePassword, int roleId);
+    void createNewEmployee(Connection conn, PreparedStatement pstmt, String fullName, String email, String employeePassword, int roleId);
     void deleteEmployee(Connection conn, PreparedStatement pstmt, ResultSet rs, String fullName);
     void showAllEmployees(Connection conn, PreparedStatement pstmt, ResultSet rs);
     void updateEmployee(Connection conn, PreparedStatement pstmt, ResultSet rs, String fullName, String email, String employeePassword, int roleId);

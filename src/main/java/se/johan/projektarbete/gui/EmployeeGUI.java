@@ -1,11 +1,10 @@
 package se.johan.projektarbete.gui;
 
-import se.johan.projektarbete.util.WorkRoleDAOImpl;
+import se.johan.projektarbete.util.WorkRoleAndEmployeeDAOImpl;
 
 import java.awt.*;
 import java.sql.*;
 import java.util.Map;
-import java.util.Objects;
 import javax.swing.*;
 
 public class EmployeeGUI {
@@ -14,7 +13,7 @@ public class EmployeeGUI {
     static ResultSet rs = null;
 
     public static void createEmployeeGUI (int employeeId) {
-        WorkRoleDAOImpl workRoleDAO = new WorkRoleDAOImpl();
+        WorkRoleAndEmployeeDAOImpl workRoleDAO = new WorkRoleAndEmployeeDAOImpl();
         Map<String, String> infoMap = workRoleDAO.showWorkRole(conn, pstmt, rs, employeeId);
 
 

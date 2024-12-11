@@ -7,8 +7,6 @@ import se.johan.projektarbete.logic.Security;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class LoginGUI {
 

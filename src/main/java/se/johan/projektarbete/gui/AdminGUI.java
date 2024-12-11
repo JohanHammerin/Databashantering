@@ -1,17 +1,340 @@
 package se.johan.projektarbete.gui;
 
-import java.sql.*;
+import se.johan.projektarbete.util.WorkRoleAndEmployeeDAO;
+import se.johan.projektarbete.util.WorkRoleAndEmployeeDAOImpl;
+import se.johan.v48project.logic.Security;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
+import java.util.Map;
+
+import java.sql.Date;
+import java.time.LocalDate;
+
+import static se.johan.projektarbete.gui.LoginGUI.*;
 
 public class AdminGUI {
 
+    static WorkRoleAndEmployeeDAO workRoleAndEmployeeDAO = new WorkRoleAndEmployeeDAOImpl();
+    static CardLayout cardLayout = new CardLayout();
+    static JPanel mainPanel = new JPanel(cardLayout); // Container för alla paneler
+    static JFrame mainFrame = new JFrame("Jobb");
+    static LocalDate currentDate = LocalDate.now();
+    static JTable workRoleTable = new JTable(); // Tom tabell
+    static JTable employeeTable = new JTable(); // Tom tabell
 
-    static Connection conn = null;
-    static PreparedStatement pstmt = null;
-    static ResultSet rs = null;
-
-    public static void createAdminGUI () {
 
 
+    static JLabel errorLabel = new JLabel(" "); // Tomt mellanrum reserverar utrymme
 
+    // Typsnitt
+    static Font buttonFont = new Font("SF Pro", Font.BOLD, 14);
+    static Font mainFont = new Font("SF Pro", Font.PLAIN, 14);
+
+    public static void createAdminGUI() {
+
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setSize(300, 400);
+
+        // UpperPanel
+        JPanel upperPanel = new JPanel();
+        UtilGUI.createUpperPanel(upperPanel);
+
+        // LowerPanel
+        JPanel lowerPanel = new JPanel(new BorderLayout());
+        errorLabel.setFont(mainFont);
+        errorLabel.setForeground(Color.RED);
+        errorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        lowerPanel.add(errorLabel, BorderLayout.CENTER);
+
+        // WorkRoleHeaderButton
+        JButton workRoleHeaderButton = new JButton("Roller");
+        workRoleHeaderButton.addActionListener(e -> cardLayout.show(mainPanel, "workRolePanel"));
+        UtilGUI.createHeaderButton(workRoleHeaderButton, upperPanel, buttonFont);
+
+        // Spacing
+        JLabel spacingHeaderLabel = new JLabel("|               |");
+        UtilGUI.createHeaderLabel(spacingHeaderLabel, upperPanel, buttonFont);
+
+        // EmployeeHeaderButton
+        JButton employeeHeaderButton = new JButton("Anställda");
+        employeeHeaderButton.addActionListener(_ -> cardLayout.show(mainPanel, "employeePanel"));
+        UtilGUI.createHeaderButton(employeeHeaderButton, upperPanel, buttonFont);
+
+        // Log Out Button
+        JButton logOutButton = new JButton("Logga ut");
+        logOutButton.addActionListener(_ -> LoginGUI.createLoginGui());
+        logOutButton.setFont(buttonFont);
+        lowerPanel.add(logOutButton, BorderLayout.SOUTH);
+
+        // Lägg till paneler i mainPanel och hantera byten med CardLayout
+        mainPanel.add(showWorkRolePanel(), "workRolePanel");
+        mainPanel.add(showEmployeePanel(), "employeePanel");
+        mainPanel.add(createNewWorkRolePanel(), "createWorkRolePanel");
+        mainPanel.add(deleteWorkRolePanel(), "deleteWorkRolePanel");
+        mainPanel.add(showAllWorkRolesPanel(), "showAllWorkRolesPanel");
+        mainPanel.add(showAllEmployeesPanel(), "showAllEmployeesPanel");
+
+        // Lägg till alla paneler i fönstret
+        mainFrame.add(upperPanel, BorderLayout.NORTH);
+        mainFrame.add(mainPanel, BorderLayout.CENTER);
+        mainFrame.add(lowerPanel, BorderLayout.SOUTH);
+
+        mainFrame.setLocationRelativeTo(null);
+        mainFrame.setResizable(false);
+        mainFrame.setVisible(true);
+    }
+
+    /**
+     * Skapar panelen för Work Role
+     */
+    private static JPanel showWorkRolePanel() {
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new GridLayout(6, 1, 10, 10));
+
+        // Buttons
+        JButton createNewWorkRoleButton = new JButton("Ny roll");
+        createNewWorkRoleButton.addActionListener(_ -> cardLayout.show(mainPanel, "createWorkRolePanel"));
+        centerPanel.add(createNewWorkRoleButton);
+
+        JButton deleteWorkRoleButton = new JButton("Ta bort roll");
+        centerPanel.add(deleteWorkRoleButton);
+
+        JButton updateWorkRoleButton = new JButton("Uppdatera roll");
+        centerPanel.add(updateWorkRoleButton);
+
+        JButton showAllWorkRolesButton = new JButton("Visa alla roller");
+        // Lägg till knapp för att visa alla arbetsroller
+        showAllWorkRolesButton.addActionListener(_ -> cardLayout.show(mainPanel, "showAllWorkRolesPanel"));
+        centerPanel.add(showAllWorkRolesButton);
+        return centerPanel;
+    }
+
+    /**
+     * Skapar panelen för Employees
+     */
+    private static JPanel showEmployeePanel() {
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new GridLayout(6, 1, 10, 10));
+
+        // Buttons
+        JButton createNewEmployeeButton = new JButton("Ny kollega");
+        centerPanel.add(createNewEmployeeButton);
+
+        JButton deleteEmployeeButton = new JButton("Ta bort kollega");
+        centerPanel.add(deleteEmployeeButton);
+
+        JButton updateEmployeeButton = new JButton("Uppdatera kollega");
+        centerPanel.add(updateEmployeeButton);
+
+        JButton showAllEmployeesButton = new JButton("Visa alla kollegor");
+        showAllEmployeesButton.addActionListener(_ -> cardLayout.show(mainPanel, "showAllEmployeesPanel"));
+        centerPanel.add(showAllEmployeesButton);
+
+        return centerPanel;
+    }
+
+
+    private static JPanel createNewWorkRolePanel() {
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new GridLayout(6, 1, 10, 10));
+
+        // Jobbtitel
+        JLabel titleLabel = new JLabel("Jobbtitel");
+        titleLabel.setFont(mainFont);
+        centerPanel.add(titleLabel);
+
+        JTextField titleTextField = new JTextField();
+        titleTextField.setFont(mainFont);
+        centerPanel.add(titleTextField);
+
+        // Arbetsbeskrivning
+        JLabel workDescriptionLabel = new JLabel("Arbetsbeskrivning");
+        workDescriptionLabel.setFont(mainFont);
+        centerPanel.add(workDescriptionLabel);
+
+        JTextField workDescriptionTextField = new JTextField();
+        workDescriptionTextField.setFont(mainFont);
+        centerPanel.add(workDescriptionTextField);
+
+        // Lön
+        JLabel salaryLabel = new JLabel("Lön");
+        salaryLabel.setFont(mainFont);
+        centerPanel.add(salaryLabel);
+
+        JTextField salaryTextField = new JTextField();
+        salaryTextField.setFont(mainFont);
+        centerPanel.add(salaryTextField);
+
+        // Skapa en tillbaka knapp
+        JButton returnButton = new JButton("Tillbaka");
+        returnButton.setFont(buttonFont);
+        returnButton.addActionListener(_ -> {
+            errorLabel.setText("");
+            titleTextField.setText("");
+            workDescriptionTextField.setText("");
+            salaryTextField.setText("");
+            cardLayout.show(mainPanel, "workRolePanel");
+        });
+        centerPanel.add(returnButton);
+
+        // Skapa Spara-knapp
+        JButton saveButton = new JButton("Spara");
+        saveButton.setFont(buttonFont);
+        saveButton.addActionListener(_ -> {
+            String title = titleTextField.getText();
+            String workDescription = workDescriptionTextField.getText();
+            String salary = salaryTextField.getText();
+            Date creationDate = Date.valueOf(currentDate);
+
+            if (Security.checkForBlancField(title) || Security.checkForBlancField(workDescription) || Security.checkForBlancField(salary)) {
+                errorLabel.setForeground(Color.ORANGE);
+                errorLabel.setText("Ett/flera fält är tomma!");
+            } else if (Security.checkForThreat(title) || Security.checkForThreat(workDescription) || Security.checkForThreat(salary)) {
+                errorLabel.setForeground(Color.RED);
+                errorLabel.setText("Inga luriga tecken");
+            } else {
+                try {
+                    double salaryValue = Double.parseDouble(salary);
+                    if (salaryValue < 0) {
+                        errorLabel.setForeground(Color.ORANGE);
+                        errorLabel.setText("Lönen får inte vara mindre än 0");
+                    } else {
+                        // Skapa ny arbetsroll
+                        workRoleAndEmployeeDAO.createNewWorkRole(conn, pstmt, title, workDescription, salaryValue, creationDate);
+                        JOptionPane.showMessageDialog(null, "Ny arbetsroll tillagd");
+                        titleTextField.setText("");
+                        workDescriptionTextField.setText("");
+                        salaryTextField.setText("");
+
+
+                        // Uppdatera alla arbetsroller efter skapandet
+                        updateWorkRolesTable();
+
+                        cardLayout.show(mainPanel, "workRolePanel");
+                        errorLabel.setText(" "); // Återställ felmeddelandet
+                    }
+                } catch (NumberFormatException ex) {
+                    errorLabel.setForeground(Color.ORANGE);
+                    errorLabel.setText("Lönen måste vara ett nummer!");
+                }
+            }
+            updateMainFrame();
+        });
+
+        centerPanel.add(saveButton);
+        return centerPanel;
+    }
+
+    // 1. Uppdaterad metod för att visa alla arbetsroller
+    private static JPanel showAllWorkRolesPanel() {
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        JScrollPane scrollPane = new JScrollPane(workRoleTable); // Lägg tabellen i en scrollpanel
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton backButton = new JButton("Tillbaka");
+        backButton.addActionListener(_ -> cardLayout.show(mainPanel, "workRolePanel"));
+        centerPanel.add(backButton, BorderLayout.SOUTH);
+
+        // Hämta data och fyll tabellen
+        try {
+            updateWorkRolesTable();  // Uppdatera tabellen med senaste data
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Kunde inte hämta arbetsroller.");
+        }
+
+        return centerPanel;
+    }
+
+    // 2. Uppdaterad metod för att hämta och uppdatera tabellen
+    private static void updateWorkRolesTable() {
+        // Hämta de senaste arbetsrollerna
+        List<Map<String, Object>> roles = workRoleAndEmployeeDAO.showAllWorkRoles(conn, pstmt, rs);
+        String[] columns = {"Titel", "Lön", "Skapad"};
+        String[][] tableData = new String[roles.size()][columns.length];
+
+        for (int i = 0; i < roles.size(); i++) {
+            Map<String, Object> role = roles.get(i);
+
+            // Säkerställ att vi inte försöker anropa toString på null
+            tableData[i][0] = role.get("title") != null ? (String) role.get("title") : "Titel saknas";
+            tableData[i][1] = role.get("salary") != null ? role.get("salary").toString() : "Lön saknas";
+            tableData[i][2] = role.get("creation_date") != null ? role.get("creation_date").toString() : "Datum saknas";
+        }
+
+        // Skapa en TableModel och gör alla celler skrivskyddade
+        DefaultTableModel model = new DefaultTableModel(tableData, columns) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Sätter alla celler som icke-redigerbara
+            }
+        };
+
+        workRoleTable.setModel(model); // Uppdaterar tabellen med den nya modellen
+    }
+
+
+    // 1. Ny metod för att visa alla anställda
+    private static JPanel showAllEmployeesPanel() {
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        JScrollPane scrollPane = new JScrollPane(employeeTable); // Lägg tabellen i en scrollpanel
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton backButton = new JButton("Tillbaka");
+        backButton.addActionListener(_-> cardLayout.show(mainPanel, "employeePanel"));
+        centerPanel.add(backButton, BorderLayout.SOUTH);
+
+        // Hämta data och fyll tabellen
+        try {
+            updateEmployeesTable(employeeTable);  // Uppdatera tabellen med senaste data
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Kunde inte hämta anställda.");
+        }
+
+        return centerPanel;
+    }
+
+    // 2. Ny metod för att hämta och uppdatera tabellen med anställda
+    private static void updateEmployeesTable(JTable table) {
+        // Hämta de senaste anställda
+        List<Map<String, Object>> employees = workRoleAndEmployeeDAO.showAllEmployees(conn, pstmt, rs);
+        String[] columns = {"Namn", "Email", "Roll"};
+        String[][] tableData = new String[employees.size()][columns.length];
+
+        for (int i = 0; i < employees.size(); i++) {
+            Map<String, Object> employee = employees.get(i);
+
+
+            tableData[i][0] = employee.get("full_name") != null ? (String) employee.get("full_name") : "Namn saknas";
+            tableData[i][1] = employee.get("email") != null ? (String) employee.get("email") : "Email saknas";
+            tableData[i][2] = employee.get("role_title") != null ? (String) employee.get("role_title") : "Roll saknas";
+        }
+
+        // Skapa en TableModel och gör alla celler skrivskyddade
+        DefaultTableModel model = new DefaultTableModel(tableData, columns) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Sätter alla celler som icke-redigerbara
+            }
+        };
+
+        table.setModel(model); // Uppdaterar tabellen med den nya modellen
+    }
+
+
+    private static JPanel deleteWorkRolePanel() {
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new GridLayout(1, 1, 10, 10));
+        // Lägg till delete-knappar här om du vill.
+        return centerPanel;
+    }
+
+    private static void updateMainFrame() {
+        mainFrame.validate();
+        mainFrame.repaint();
     }
 }

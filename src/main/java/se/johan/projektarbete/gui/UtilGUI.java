@@ -27,5 +27,10 @@ public class UtilGUI {
         label.setFont(font);
         panel.add(label);
     }
+
+    public static void createHeaderButton(JButton button, JPanel panel, Font font) {
+        button.setFont(font);
+        panel.add(button);
+    }
 }
 

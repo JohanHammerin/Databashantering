@@ -37,7 +37,7 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
 
     //Klar
     @Override
-    public void deleteWorkRole(Connection conn, PreparedStatement pstmt, ResultSet rs, String title) {
+    public void deleteWorkRole(Connection conn, PreparedStatement pstmt, String title) {
 
         try {
             conn = JDBCUtil.getConnection();
@@ -94,6 +94,8 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
                 role.put("creation_date", rs.getDate("creation_date"));
                 workRoles.add(role);
             }
+
+            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             JDBCUtil.rollback(conn);
@@ -105,17 +107,17 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
 
     //Klar
     @Override
-    public void updateWorkRole(Connection conn, PreparedStatement pstmt, String title, String workDescription, double salary, Date creationDate, int workId) {
+    public void updateWorkRole(Connection conn, PreparedStatement pstmt, String title, String workDescription, double salary, Date creationDate, int roleId) {
         try {
             conn = JDBCUtil.getConnection();
 
             String sql = """
                     UPDATE work_role
                         SET title = ?,
-                        SET work_description = ?,
-                        SET salary = ?,
-                        SET creation_date = ?,
-                    WHERE work_id = ?;
+                            work_description = ?,
+                            salary = ?,
+                            creation_date = ?
+                    WHERE role_id = ?;
                     """;
 
             pstmt = conn.prepareStatement(sql);
@@ -124,7 +126,7 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
             pstmt.setString(2, workDescription);
             pstmt.setDouble(3, salary);
             pstmt.setDate(4, creationDate);
-            pstmt.setInt(5, workId);
+            pstmt.setInt(5, roleId);
 
             pstmt.executeUpdate();
 
@@ -141,36 +143,48 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
 
     //Klar
     @Override
-    public void createNewEmployee(Connection conn, PreparedStatement pstmt, String fullName, String email, String employeePassword, int roleId) {
-
+    public void createNewEmployee(Connection conn, PreparedStatement pstmt, String fullName, String email, String employeePassword, String title) {
         try {
+            // Få anslutning till databasen
             conn = JDBCUtil.getConnection();
 
+            // Hämta role_id baserat på title
+            String roleIdQuery = "SELECT role_id FROM work_role WHERE title = ?";
+            pstmt = conn.prepareStatement(roleIdQuery);
+            pstmt.setString(1, title);
+            ResultSet rs = pstmt.executeQuery();
+
+            // Kontrollera om den valda titeln finns i work_role-tabellen
+            int roleId = -1;
+            if (rs.next()) {
+                roleId = rs.getInt("role_id");
+            } else {
+                throw new SQLException("Rolltitel hittades inte.");
+            }
+
+            // SQL-fråga för att skapa en ny anställd
             String sql = """
                     INSERT INTO employee (full_name, email, employee_password, role_id)
                     VALUES (?, ?, ?, ?);
                     """;
 
             pstmt = conn.prepareStatement(sql);
-
             pstmt.setString(1, fullName);
             pstmt.setString(2, email);
             pstmt.setString(3, employeePassword);
-            pstmt.setInt(4, roleId);
+            pstmt.setInt(4, roleId); // Använd role_id från work_role-tabellen
 
             pstmt.executeUpdate();
-
             conn.commit();
-
 
         } catch (SQLException e) {
             e.printStackTrace();
-            JDBCUtil.rollback(conn);
+            JDBCUtil.rollback(conn); // Ångra om det uppstår ett fel
         } finally {
             JDBCUtil.close(conn, pstmt);
         }
-
     }
+
 
     //Klar
     @Override
@@ -216,10 +230,10 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
 
             // Uppdaterad SQL-fråga som gör en JOIN mellan employee och work_role
             String sql = """
-                SELECT employee.full_name, employee.email, work_role.title
-                FROM employee
-                INNER JOIN work_role ON employee.role_id = work_role.role_id
-                """;
+                    SELECT employee.full_name, employee.email, work_role.title
+                    FROM employee
+                    INNER JOIN work_role ON employee.role_id = work_role.role_id
+                    """;
 
             pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
@@ -241,10 +255,9 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
     }
 
 
-
     //Klar
     @Override
-    public void updateEmployee(Connection conn, PreparedStatement pstmt, String fullName, String email, String employeePassword, int roleId) {
+    public void updateEmployee(Connection conn, PreparedStatement pstmt, String fullName, String email, String employeePassword, int roleId, int employeeId) {
 
         try {
             conn = JDBCUtil.getConnection();
@@ -252,9 +265,10 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
             String sql = """
                     UPDATE employee
                         SET full_name = ?,
-                        SET email = ?,
-                        SET employee_password = ?,
-                        set role_id = ?
+                        email = ?,
+                        employee_password = ?,
+                        role_id = ?
+                    WHERE employee_id = ?
                     """;
 
             pstmt = conn.prepareStatement(sql);
@@ -263,6 +277,7 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
             pstmt.setString(2, email);
             pstmt.setString(3, employeePassword);
             pstmt.setInt(4, roleId);
+            pstmt.setInt(5, employeeId);
 
             pstmt.executeUpdate();
 

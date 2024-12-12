@@ -12,7 +12,7 @@ public class EmployeeGUI {
     static PreparedStatement pstmt = null;
     static ResultSet rs = null;
 
-    public static void createEmployeeGUI (int employeeId) {
+    public static void createEmployeeGUI(int employeeId) {
         WorkRoleAndEmployeeDAOImpl workRoleDAO = new WorkRoleAndEmployeeDAOImpl();
         Map<String, String> infoMap = workRoleDAO.showWorkRole(conn, pstmt, rs, employeeId);
 
@@ -82,7 +82,6 @@ public class EmployeeGUI {
         });
 
         lowerPanel.add(logOutButton);
-
 
 
         // Lägg till panelen i frame

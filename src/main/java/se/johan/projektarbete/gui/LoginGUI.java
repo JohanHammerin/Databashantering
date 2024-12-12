@@ -73,7 +73,7 @@ public class LoginGUI {
             String email = emailTextField.getText();
             String password = passwordTextField.getText();
 
-            if (Security.checkForBlancField(email) && Security.checkForBlancField(password)) {
+            if (!Security.checkForBlancField(email) || !Security.checkForBlancField(password)) {
                 if (Security.checkForThreat(email) || Security.checkForThreat(password)) {
                     errorLabel.setText("Farliga tecken!");
                 } else {

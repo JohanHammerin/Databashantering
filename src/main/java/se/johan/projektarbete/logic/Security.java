@@ -65,7 +65,7 @@ public class Security {
     }
 
     public static boolean checkForBlancField(String input) {
-        return !input.isBlank();
+        return input.isBlank();
     }
 }
 

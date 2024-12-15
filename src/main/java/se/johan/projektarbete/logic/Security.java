@@ -34,9 +34,10 @@ public class Security {
         try {
             conn = JDBCUtil.getConnection();
             String sql = """
-                    SELECT employee_id
+                    SELECT employee.role_id
                     FROM employee
-                    WHERE email = ? AND employee_password = ?
+                    INNER JOIN work_role ON employee.role_id = work_role.role_id
+                    WHERE employee.email = ? AND employee.employee_password = ?;
                     """;
             pstmt = conn.prepareStatement(sql);
 
@@ -46,7 +47,7 @@ public class Security {
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                int employeeId = rs.getInt("employee_id");
+                int employeeId = rs.getInt("role_id");
                 userExists = true;
                 if (employeeId == 1) {
                     AdminGUI.createAdminGUI();

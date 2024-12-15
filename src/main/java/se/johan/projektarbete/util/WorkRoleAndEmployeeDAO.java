@@ -15,7 +15,8 @@ public interface WorkRoleAndEmployeeDAO {
 
     List<Map<String, Object>> showAllWorkRoles(Connection conn, PreparedStatement pstmt, ResultSet rs);
 
-    void updateWorkRole(Connection conn, PreparedStatement pstmt, String title, String workDescription, double salary, java.sql.Date creationDate, int workId);
+    void updateWorkRole(Connection conn, PreparedStatement pstmt, String workDescription, double salary, java.sql.Date creationDate, String selectedRole);
+
 
     //Employee
     void createNewEmployee(Connection conn, PreparedStatement pstmt, String fullName, String email, String employeePassword, String title);
@@ -24,7 +25,7 @@ public interface WorkRoleAndEmployeeDAO {
 
     List<Map<String, Object>> showAllEmployees(Connection conn, PreparedStatement pstmt, ResultSet rs);
 
-    void updateEmployee(Connection conn, PreparedStatement pstmt, String fullName, String email, String employeePassword, int roleId, int employeeId);
+    void updateEmployee(Connection conn, PreparedStatement pstmt, ResultSet rs, String email, String employeePassword, String selectedEmployee, String selectedRole);
 
     Map<String, String> showWorkRole(Connection conn, PreparedStatement pstmt, ResultSet rs, int employeeId);
 

@@ -7,24 +7,35 @@ import se.johan.projektarbete.logic.Security;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
 
 import java.sql.Date;
 import java.time.LocalDate;
 
-import static se.johan.projektarbete.gui.LoginGUI.*;
+import static se.johan.projektarbete.util.WorkRoleAndEmployeeDAOImpl.checkForDuplicateTitle;
+
 
 public class AdminGUI {
-
+    static Connection conn = null;
+    static PreparedStatement pstmt = null;
+    static ResultSet rs = null;
     static WorkRoleAndEmployeeDAO workRoleAndEmployeeDAO = new WorkRoleAndEmployeeDAOImpl();
     static CardLayout cardLayout = new CardLayout();
     static JPanel mainPanel = new JPanel(cardLayout); // Container för alla paneler
     static JFrame mainFrame = new JFrame("Jobb");
     static LocalDate currentDate = LocalDate.now();
-    static JTable workRoleTable = new JTable(); // Tom tabell
-    static JTable employeeTable = new JTable(); // Tom tabell
-
+    static JTable workRoleTable = new JTable();
+    static JTable employeeTable = new JTable();
+    static JComboBox<String> roleComboBoxCreateNewEmployee = new JComboBox<>();
+    static JComboBox<String> roleComboBoxDeleteWorkRole = new JComboBox<>();
+    static JComboBox<String> roleComboBoxUpdateWorkRole = new JComboBox<>();
+    static JComboBox<String> employeeComboBoxUpdateEmployee = new JComboBox<>();
+    static JComboBox<String> employeeComboBoxDeleteEmployee = new JComboBox<>();
+    static JComboBox<String> roleComboBoxUpdateEmployee = new JComboBox<>();
 
     static JLabel errorLabel = new JLabel(" "); // Tomt mellanrum reserverar utrymme
 
@@ -50,7 +61,7 @@ public class AdminGUI {
 
         // WorkRoleHeaderButton
         JButton workRoleHeaderButton = new JButton("Roller");
-        workRoleHeaderButton.addActionListener(e -> cardLayout.show(mainPanel, "workRolePanel"));
+        workRoleHeaderButton.addActionListener(_ -> cardLayout.show(mainPanel, "workRolePanel"));
         UtilGUI.createHeaderButton(workRoleHeaderButton, upperPanel, buttonFont);
 
         // Spacing
@@ -72,10 +83,13 @@ public class AdminGUI {
         mainPanel.add(showWorkRolePanel(), "workRolePanel");
         mainPanel.add(showEmployeePanel(), "employeePanel");
         mainPanel.add(createNewWorkRolePanel(), "createWorkRolePanel");
-        mainPanel.add(deleteWorkRolePanel(), "deleteWorkRolePanel");
         mainPanel.add(showAllWorkRolesPanel(), "showAllWorkRolesPanel");
-        mainPanel.add(showAllEmployeesPanel(), "showAllEmployeesPanel");
         mainPanel.add(createNewEmployeePanel(), "createNewEmployeePanel");
+        mainPanel.add(deleteWorkRolePanel(), "deleteWorkRolePanel");
+        mainPanel.add(showAllEmployeesPanel(), "showAllEmployeesPanel");
+        mainPanel.add(deleteEmployee(), "deleteEmployeePanel");
+        mainPanel.add(updateWorkRole(), "updateWorkRolePanel");
+        mainPanel.add(updateEmployee(), "updateEmployeePanel");
 
         // Lägg till alla paneler i fönstret
         mainFrame.add(upperPanel, BorderLayout.NORTH);
@@ -100,13 +114,21 @@ public class AdminGUI {
         centerPanel.add(createNewWorkRoleButton);
 
         JButton deleteWorkRoleButton = new JButton("Ta bort roll");
+        deleteWorkRoleButton.addActionListener(_ -> {
+            updateMethods();
+            cardLayout.show(mainPanel, "deleteWorkRolePanel");
+        });
         centerPanel.add(deleteWorkRoleButton);
 
         JButton updateWorkRoleButton = new JButton("Uppdatera roll");
+        updateWorkRoleButton.addActionListener(_ -> {
+            updateMethods();
+            cardLayout.show(mainPanel, "updateWorkRolePanel");
+        });
         centerPanel.add(updateWorkRoleButton);
 
         JButton showAllWorkRolesButton = new JButton("Visa alla roller");
-        // Lägg till knapp för att visa alla arbetsroller
+        updateMethods();
         showAllWorkRolesButton.addActionListener(_ -> cardLayout.show(mainPanel, "showAllWorkRolesPanel"));
         centerPanel.add(showAllWorkRolesButton);
         return centerPanel;
@@ -119,19 +141,34 @@ public class AdminGUI {
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new GridLayout(6, 1, 10, 10));
 
+
         // Buttons
         JButton createNewEmployeeButton = new JButton("Ny kollega");
-        createNewEmployeeButton.addActionListener(_ -> cardLayout.show(mainPanel, "createNewEmployeePanel"));
+        createNewEmployeeButton.addActionListener(_ -> {
+            updateMethods();
+            cardLayout.show(mainPanel, "createNewEmployeePanel");
+        });
         centerPanel.add(createNewEmployeeButton);
 
         JButton deleteEmployeeButton = new JButton("Ta bort kollega");
+        deleteEmployeeButton.addActionListener(_ -> {
+            updateMethods();
+            cardLayout.show(mainPanel, "deleteEmployeePanel");
+        });
         centerPanel.add(deleteEmployeeButton);
 
         JButton updateEmployeeButton = new JButton("Uppdatera kollega");
+        updateEmployeeButton.addActionListener(_ -> {
+            updateMethods();
+            cardLayout.show(mainPanel, "updateEmployeePanel");
+        });
         centerPanel.add(updateEmployeeButton);
 
         JButton showAllEmployeesButton = new JButton("Visa alla kollegor");
-        showAllEmployeesButton.addActionListener(_ -> cardLayout.show(mainPanel, "showAllEmployeesPanel"));
+        showAllEmployeesButton.addActionListener(_ -> {
+            updateMethods();
+            cardLayout.show(mainPanel, "showAllEmployeesPanel");
+        });
         centerPanel.add(showAllEmployeesButton);
 
         return centerPanel;
@@ -190,12 +227,16 @@ public class AdminGUI {
             String salary = salaryTextField.getText();
             Date creationDate = Date.valueOf(currentDate);
 
+
             if (Security.checkForBlancField(title) || Security.checkForBlancField(workDescription) || Security.checkForBlancField(salary)) {
                 errorLabel.setForeground(Color.ORANGE);
                 errorLabel.setText("Ett/flera fält är tomma!");
             } else if (Security.checkForThreat(title) || Security.checkForThreat(workDescription) || Security.checkForThreat(salary)) {
                 errorLabel.setForeground(Color.RED);
                 errorLabel.setText("Inga luriga tecken");
+            } else if (checkForDuplicateTitle(conn, pstmt, rs, title)) {
+                errorLabel.setForeground(Color.RED);
+                errorLabel.setText("Denna jobbtitel finns redan!");
             } else {
                 try {
                     double salaryValue = Double.parseDouble(salary);
@@ -216,6 +257,7 @@ public class AdminGUI {
 
                         cardLayout.show(mainPanel, "workRolePanel");
                         errorLabel.setText(" "); // Återställ felmeddelandet
+                        updateRoleComboBox(roleComboBoxCreateNewEmployee);
                     }
                 } catch (NumberFormatException ex) {
                     errorLabel.setForeground(Color.ORANGE);
@@ -252,7 +294,7 @@ public class AdminGUI {
 
     // 2. Uppdaterad metod för att hämta och uppdatera tabellen
     private static void updateWorkRolesTable() {
-        // Hämta de senaste arbetsrollerna
+        workRoleTable.setModel(new DefaultTableModel());
         List<Map<String, Object>> roles = workRoleAndEmployeeDAO.showAllWorkRoles(conn, pstmt, rs);
         String[] columns = {"Titel", "Lön", "Skapad"};
         String[][] tableData = new String[roles.size()][columns.length];
@@ -285,7 +327,8 @@ public class AdminGUI {
         centerPanel.add(scrollPane, BorderLayout.CENTER);
 
         JButton backButton = new JButton("Tillbaka");
-        backButton.addActionListener(_ -> cardLayout.show(mainPanel, "employeePanel"));
+        backButton.addActionListener(_ -> cardLayout.show(mainPanel, "employeePanel")
+        );
         centerPanel.add(backButton, BorderLayout.SOUTH);
 
         // Hämta data och fyll tabellen
@@ -301,6 +344,8 @@ public class AdminGUI {
 
     // 2. Ny metod för att hämta och uppdatera tabellen med anställda
     private static void updateEmployeesTable() {
+        employeeTable.setModel(new DefaultTableModel());
+
         // Hämta de senaste anställda
         List<Map<String, Object>> employees = workRoleAndEmployeeDAO.showAllEmployees(conn, pstmt, rs);
         String[] columns = {"Namn", "Email", "Roll"};
@@ -363,21 +408,7 @@ public class AdminGUI {
         roleLabel.setFont(mainFont);
         centerPanel.add(roleLabel);
 
-
-
-        // Skapa JComboBox och fyll med roller
-        JComboBox<String> roleComboBox = new JComboBox<>();
-        try {
-            List<Map<String, Object>> roles = workRoleAndEmployeeDAO.showAllWorkRoles(conn, pstmt, rs);
-            for (Map<String, Object> role : roles) {
-                String roleTitle = role.get("title") != null ? (String) role.get("title") : "Okänd roll";
-                roleComboBox.addItem(roleTitle);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Kunde inte hämta arbetsroller.");
-        }
-        centerPanel.add(roleComboBox);
+        centerPanel.add(roleComboBoxCreateNewEmployee);
 
         // Tillbaka-knapp
         JButton returnButton = new JButton("Tillbaka");
@@ -398,7 +429,7 @@ public class AdminGUI {
             String fullName = fullNameTextField.getText();
             String email = emailTextField.getText();
             String employeePassword = employeePasswordTextField.getText();
-            String selectedRole = (String) roleComboBox.getSelectedItem();
+            String selectedRole = (String) roleComboBoxCreateNewEmployee.getSelectedItem();
 
 
             if (Security.checkForBlancField(fullName) || Security.checkForBlancField(email) || Security.checkForBlancField(employeePassword)) {
@@ -438,17 +469,318 @@ public class AdminGUI {
     }
 
 
+    private static void updateRoleComboBox(JComboBox<String> roleComboBox) {
+        try {
+            roleComboBox.removeAllItems();
+            List<Map<String, Object>> roles = workRoleAndEmployeeDAO.showAllWorkRoles(conn, pstmt, rs);
+            for (Map<String, Object> role : roles) {
+                String roleTitle = role.get("title") != null ? (String) role.get("title") : "Okänd roll";
+                roleComboBox.addItem(roleTitle);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Kunde inte hämta arbetsroller.");
+        }
+    }
+
+    private static void updateEmployeeComboBox(JComboBox<String> employeeComboBox) {
+        try {
+            employeeComboBox.removeAllItems();
+            List<Map<String, Object>> roles = workRoleAndEmployeeDAO.showAllEmployees(conn, pstmt, rs);
+            for (Map<String, Object> role : roles) {
+                String employeeName = role.get("full_name") != null ? (String) role.get("full_name") : "Okänd roll";
+                employeeComboBox.addItem(employeeName);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Kunde inte hämta anställda.");
+        }
+    }
 
 
     private static JPanel deleteWorkRolePanel() {
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new GridLayout(1, 1, 10, 10));
-        // Lägg till delete-knappar här om du vill.
+        centerPanel.setLayout(new GridLayout(6, 1, 10, 10));
+
+        //roll som ska tas bort
+        JLabel workRoleLabel = new JLabel("Roller:");
+        workRoleLabel.setFont(mainFont);
+        centerPanel.add(workRoleLabel);
+
+        centerPanel.add(roleComboBoxDeleteWorkRole);
+
+
+        JButton returnButton = new JButton("Tillbaka");
+        returnButton.setFont(buttonFont);
+        returnButton.addActionListener(_ -> cardLayout.show(mainPanel, "workRolePanel"));
+        centerPanel.add(returnButton);
+
+        JButton deleteButton = new JButton("Radera");
+        deleteButton.setFont(buttonFont);
+        deleteButton.addActionListener(_ -> {
+
+            String selectedRole = (String) roleComboBoxDeleteWorkRole.getSelectedItem();
+            assert selectedRole != null;
+            if (selectedRole.equals("Admin")) {
+                errorLabel.setForeground(Color.RED);
+                errorLabel.setText("Admin får inte raderas!");
+            } else {
+                try {
+
+                    workRoleAndEmployeeDAO.deleteWorkRole(conn, pstmt, selectedRole);
+                    errorLabel.setText("");
+                    JOptionPane.showMessageDialog(null, selectedRole + " har tagits bort!");
+                    updateMethods();
+                    cardLayout.show(mainPanel, "workRolePanel");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+        });
+
+        centerPanel.add(deleteButton);
+
+        centerPanel.add(new JLabel());
+        centerPanel.add(new JLabel());
+        centerPanel.add(new JLabel());
+        centerPanel.add(new JLabel());
+        return centerPanel;
+
+    }
+
+
+    private static JPanel deleteEmployee() {
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new GridLayout(6, 1, 10, 10));
+
+        JLabel employeeNamesLabel = new JLabel("Anställda");
+        employeeNamesLabel.setFont(mainFont);
+        centerPanel.add(employeeNamesLabel);
+
+        //ComboBox
+        centerPanel.add(employeeComboBoxDeleteEmployee);
+
+        JButton returnButton = new JButton("Tillbaka");
+        returnButton.setFont(buttonFont);
+        returnButton.addActionListener(_ -> cardLayout.show(mainPanel, "employeePanel"));
+        centerPanel.add(returnButton);
+
+        JButton deleteButton = new JButton("Ta bort");
+        deleteButton.setFont(buttonFont);
+        deleteButton.addActionListener(_ -> {
+            String selectedEmployee = (String) employeeComboBoxDeleteEmployee.getSelectedItem();
+            workRoleAndEmployeeDAO.deleteEmployee(conn, pstmt, selectedEmployee);
+            JOptionPane.showMessageDialog(null, selectedEmployee + " har tagits bort!");
+            cardLayout.show(mainPanel, "employeePanel");
+        });
+        centerPanel.add(deleteButton);
+
+
+        centerPanel.add(new JLabel());
+        centerPanel.add(new JLabel());
+        centerPanel.add(new JLabel());
+        centerPanel.add(new JLabel());
+
+
         return centerPanel;
     }
+
+
+    private static JPanel updateWorkRole() {
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new GridLayout(6, 1, 10, 10));
+
+
+        JLabel workRoleLabel = new JLabel("Roller");
+        workRoleLabel.setFont(mainFont);
+        centerPanel.add(workRoleLabel);
+
+        centerPanel.add(roleComboBoxUpdateWorkRole);
+
+
+        // Arbetsbeskrivning
+        JLabel workDescriptionLabel = new JLabel("Arbetsbeskrivning");
+        workDescriptionLabel.setFont(mainFont);
+
+        centerPanel.add(workDescriptionLabel);
+
+        JTextField workDescriptionTextField = new JTextField();
+        workDescriptionTextField.setFont(mainFont);
+        centerPanel.add(workDescriptionTextField);
+
+        // Lön
+        JLabel salaryLabel = new JLabel("Lön");
+        salaryLabel.setFont(mainFont);
+        centerPanel.add(salaryLabel);
+
+        JTextField salaryTextField = new JTextField();
+        salaryTextField.setFont(mainFont);
+        centerPanel.add(salaryTextField);
+
+        // Skapa en tillbaka knapp
+        JButton returnButton = new JButton("Tillbaka");
+        returnButton.setFont(buttonFont);
+        returnButton.addActionListener(_ -> {
+            errorLabel.setText("");
+            workDescriptionTextField.setText("");
+            salaryTextField.setText("");
+            cardLayout.show(mainPanel, "workRolePanel");
+        });
+        centerPanel.add(returnButton);
+
+        // Skapa Spara-knapp
+        JButton saveButton = new JButton("Spara");
+        saveButton.setFont(buttonFont);
+        saveButton.addActionListener(_ -> {
+            String workDescription = workDescriptionTextField.getText();
+            String salary = salaryTextField.getText();
+            Date creationDate = Date.valueOf(currentDate);
+
+
+            if (Security.checkForBlancField(workDescription) || Security.checkForBlancField(salary)) {
+                errorLabel.setForeground(Color.ORANGE);
+                errorLabel.setText("Ett/flera fält är tomma!");
+            } else if (Security.checkForThreat(workDescription) || Security.checkForThreat(salary)) {
+                errorLabel.setForeground(Color.RED);
+                errorLabel.setText("Inga luriga tecken");
+            } else {
+                try {
+                    double salaryValue = Double.parseDouble(salary);
+                    if (salaryValue < 0) {
+                        errorLabel.setForeground(Color.ORANGE);
+                        errorLabel.setText("Lönen får inte vara mindre än 0");
+                    } else {
+                        // Uppdatera ny arbetsroll
+                        String selectedRole = (String) roleComboBoxUpdateWorkRole.getSelectedItem();
+                        workRoleAndEmployeeDAO.updateWorkRole(conn, pstmt, workDescription, salaryValue, creationDate, selectedRole);
+                        updateMethods();
+                        JOptionPane.showMessageDialog(null, "Arbetsroll uppdaterad");
+                        workDescriptionTextField.setText("");
+                        salaryTextField.setText("");
+
+
+                        cardLayout.show(mainPanel, "workRolePanel");
+                        errorLabel.setText(" "); // Återställ felmeddelandet
+                    }
+                } catch (NumberFormatException ex) {
+                    errorLabel.setForeground(Color.ORANGE);
+                    errorLabel.setText("Lönen måste vara ett nummer!");
+                }
+            }
+            updateMainFrame();
+        });
+
+        centerPanel.add(saveButton);
+
+
+        return centerPanel;
+    }
+
+    private static JPanel updateEmployee() {
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new GridLayout(7, 1, 10, 10));
+
+        JLabel employeeNameLabel = new JLabel("Anställda");
+        employeeNameLabel.setFont(mainFont);
+        centerPanel.add(employeeNameLabel);
+
+        centerPanel.add(employeeComboBoxUpdateEmployee);
+
+        // Email
+        JLabel emailLabel = new JLabel("Email");
+        emailLabel.setFont(mainFont);
+        centerPanel.add(emailLabel);
+
+        JTextField emailTextField = new JTextField();
+        emailTextField.setFont(mainFont);
+        centerPanel.add(emailTextField);
+
+        // Lösenord
+        JLabel employeePasswordLabel = new JLabel("Lösenord");
+        employeePasswordLabel.setFont(mainFont);
+        centerPanel.add(employeePasswordLabel);
+
+        JTextField employeePasswordTextField = new JTextField();
+        employeePasswordTextField.setFont(mainFont);
+        centerPanel.add(employeePasswordTextField);
+
+        JLabel workRoleLabel = new JLabel("Roller");
+        workRoleLabel.setFont(mainFont);
+        centerPanel.add(workRoleLabel);
+
+        centerPanel.add(roleComboBoxUpdateEmployee);
+
+
+        // Tillbaka-knapp
+        JButton returnButton = new JButton("Tillbaka");
+        returnButton.setFont(buttonFont);
+        returnButton.addActionListener(_ -> {
+            errorLabel.setText("");
+            emailTextField.setText("");
+            employeePasswordTextField.setText("");
+            cardLayout.show(mainPanel, "employeePanel");
+        });
+        centerPanel.add(returnButton);
+
+        // Spara-knapp
+        JButton saveButton = new JButton("Spara");
+        saveButton.setFont(buttonFont);
+        saveButton.addActionListener(_ -> {
+            String email = emailTextField.getText();
+            String employeePassword = employeePasswordTextField.getText();
+            String selectedEmployee = (String) employeeComboBoxUpdateEmployee.getSelectedItem();
+            String selectedRole = (String) roleComboBoxUpdateWorkRole.getSelectedItem();
+
+
+            if (Security.checkForBlancField(email) || Security.checkForBlancField(employeePassword)) {
+                errorLabel.setForeground(Color.ORANGE);
+                errorLabel.setText("Ett/flera fält är tomma!");
+            } else if (Security.checkForThreat(email) || Security.checkForThreat(employeePassword)) {
+                errorLabel.setForeground(Color.RED);
+                errorLabel.setText("Inga luriga tecken");
+            } else {
+
+                try {
+                    // Skapa ny anställd
+                    assert selectedEmployee != null;
+                    workRoleAndEmployeeDAO.updateEmployee(conn, pstmt, rs, email, employeePassword, selectedEmployee, selectedRole);
+                    JOptionPane.showMessageDialog(null, "Anställd uppdaterad.");
+                    emailTextField.setText("");
+                    employeePasswordTextField.setText("");
+                    errorLabel.setText(" "); // Återställ felmeddelandet
+
+
+                    // Uppdatera tabellen med anställda
+                    updateMethods();
+
+                    cardLayout.show(mainPanel, "employeePanel");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    errorLabel.setForeground(Color.RED);
+                    errorLabel.setText("Kunde inte lägga till anställd.");
+                }
+            }
+            updateMainFrame();
+        });
+        centerPanel.add(saveButton);
+        return centerPanel;
+    }
+
 
     private static void updateMainFrame() {
         mainFrame.validate();
         mainFrame.repaint();
+    }
+
+    private static void updateMethods() {
+        updateRoleComboBox(roleComboBoxCreateNewEmployee);
+        updateRoleComboBox(roleComboBoxDeleteWorkRole);
+        updateEmployeeComboBox(employeeComboBoxDeleteEmployee);
+        updateRoleComboBox(roleComboBoxUpdateWorkRole);
+        updateEmployeeComboBox(employeeComboBoxUpdateEmployee);
+        updateRoleComboBox(roleComboBoxUpdateEmployee);
+        updateEmployeesTable();
+        updateWorkRolesTable();
     }
 }

@@ -271,7 +271,6 @@ public class AdminGUI {
         return centerPanel;
     }
 
-    // 1. Uppdaterad metod för att visa alla arbetsroller
     private static JPanel showAllWorkRolesPanel() {
         JPanel centerPanel = new JPanel(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane(workRoleTable); // Lägg tabellen i en scrollpanel
@@ -292,7 +291,6 @@ public class AdminGUI {
         return centerPanel;
     }
 
-    // 2. Uppdaterad metod för att hämta och uppdatera tabellen
     private static void updateWorkRolesTable() {
         workRoleTable.setModel(new DefaultTableModel());
         List<Map<String, Object>> roles = workRoleAndEmployeeDAO.showAllWorkRoles(conn, pstmt, rs);
@@ -320,7 +318,6 @@ public class AdminGUI {
     }
 
 
-    // 1. Ny metod för att visa alla anställda
     private static JPanel showAllEmployeesPanel() {
         JPanel centerPanel = new JPanel(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane(employeeTable); // Lägg tabellen i en scrollpanel
@@ -342,7 +339,6 @@ public class AdminGUI {
         return centerPanel;
     }
 
-    // 2. Ny metod för att hämta och uppdatera tabellen med anställda
     private static void updateEmployeesTable() {
         employeeTable.setModel(new DefaultTableModel());
 
@@ -599,15 +595,17 @@ public class AdminGUI {
         centerPanel.add(roleComboBoxUpdateWorkRole);
 
 
+
+
         // Arbetsbeskrivning
         JLabel workDescriptionLabel = new JLabel("Arbetsbeskrivning");
         workDescriptionLabel.setFont(mainFont);
 
         centerPanel.add(workDescriptionLabel);
 
-        JTextField workDescriptionTextField = new JTextField();
-        workDescriptionTextField.setFont(mainFont);
-        centerPanel.add(workDescriptionTextField);
+        JTextArea workDescriptionTextArea = new JTextArea();
+        workDescriptionTextArea.setFont(mainFont);
+        centerPanel.add(workDescriptionTextArea);
 
         // Lön
         JLabel salaryLabel = new JLabel("Lön");
@@ -623,7 +621,7 @@ public class AdminGUI {
         returnButton.setFont(buttonFont);
         returnButton.addActionListener(_ -> {
             errorLabel.setText("");
-            workDescriptionTextField.setText("");
+            workDescriptionTextArea.setText("");
             salaryTextField.setText("");
             cardLayout.show(mainPanel, "workRolePanel");
         });
@@ -633,7 +631,7 @@ public class AdminGUI {
         JButton saveButton = new JButton("Spara");
         saveButton.setFont(buttonFont);
         saveButton.addActionListener(_ -> {
-            String workDescription = workDescriptionTextField.getText();
+            String workDescription = workDescriptionTextArea.getText();
             String salary = salaryTextField.getText();
             Date creationDate = Date.valueOf(currentDate);
 
@@ -656,7 +654,7 @@ public class AdminGUI {
                         workRoleAndEmployeeDAO.updateWorkRole(conn, pstmt, workDescription, salaryValue, creationDate, selectedRole);
                         updateMethods();
                         JOptionPane.showMessageDialog(null, "Arbetsroll uppdaterad");
-                        workDescriptionTextField.setText("");
+                        workDescriptionTextArea.setText("");
                         salaryTextField.setText("");
 
 

@@ -29,5 +29,7 @@ public interface WorkRoleAndEmployeeDAO {
 
     Map<String, String> showWorkRole(Connection conn, PreparedStatement pstmt, ResultSet rs, int employeeId);
 
+    Map<String, String> showWorkRole(Connection conn, PreparedStatement pstmt, ResultSet rs, String selectedRole);
+
 
 }

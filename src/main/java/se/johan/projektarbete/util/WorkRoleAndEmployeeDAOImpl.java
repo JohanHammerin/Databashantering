@@ -365,5 +365,66 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
         return Map.of();
     }
 
+    @Override
+    public Map<String, String> showWorkRole(Connection conn, PreparedStatement pstmt, ResultSet rs, String selectedRole) {
+        try {
+            conn = JDBCUtil.getConnection();
+
+            String sql = """
+                    SELECT *
+                    FROM work_role
+                    WHERE title = ?
+                    """;
+
+            pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, selectedRole);
+            rs = pstmt.executeQuery();
+
+            Map<String, String> infoMap = new HashMap<>();
+
+            while (rs.next()) {
+                infoMap.put("work_description", rs.getString("work_description"));
+                infoMap.put("salary", String.valueOf(rs.getDouble("salary")));
+            }
+            return infoMap;
+
+
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JDBCUtil.rollback(conn);
+        } finally {
+            JDBCUtil.close(conn, pstmt);
+        }
+
+
+        return Map.of();
+    }
+
+
+    public void createNewWorkRole(Connection conn, String title, String workDescription, double salary, Date creationDate) {
+        PreparedStatement pstmt = null;
+        try {
+            String sql = """
+            INSERT INTO work_role (title, work_description, salary, creation_date)
+            VALUES (?, ?, ?, ?);
+        """;
+
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, title);
+            pstmt.setString(2, workDescription);
+            pstmt.setDouble(3, salary);
+            pstmt.setDate(4, creationDate);
+
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            JDBCUtil.close(pstmt); // Bara stäng PreparedStatement
+        }
+    }
+
 
 }

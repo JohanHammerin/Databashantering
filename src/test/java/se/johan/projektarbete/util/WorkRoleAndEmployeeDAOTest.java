@@ -45,7 +45,7 @@ class WorkRoleAndEmployeeDAOTest {
         Date creationDate = new Date(System.currentTimeMillis());
 
         // Anropa metoden som ska testas
-        dao.createNewWorkRole(conn, title, workDescription, salary, creationDate);
+        dao.createNewWorkRoleTest(conn, title, workDescription, salary, creationDate);
 
 
         // Verifiera att datan har lagts till

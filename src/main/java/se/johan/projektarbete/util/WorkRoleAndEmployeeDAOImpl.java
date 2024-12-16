@@ -1,6 +1,5 @@
 package se.johan.projektarbete.util;
 
-import com.mysql.cj.protocol.Resultset;
 
 import java.sql.*;
 import java.sql.Date;
@@ -390,8 +389,6 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
             return infoMap;
 
 
-
-
         } catch (SQLException e) {
             e.printStackTrace();
             JDBCUtil.rollback(conn);
@@ -404,13 +401,13 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
     }
 
 
-    public void createNewWorkRole(Connection conn, String title, String workDescription, double salary, Date creationDate) {
+    public void createNewWorkRoleTest(Connection conn, String title, String workDescription, double salary, Date creationDate) {
         PreparedStatement pstmt = null;
         try {
             String sql = """
-            INSERT INTO work_role (title, work_description, salary, creation_date)
-            VALUES (?, ?, ?, ?);
-        """;
+                        INSERT INTO work_role (title, work_description, salary, creation_date)
+                        VALUES (?, ?, ?, ?);
+                    """;
 
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, title);

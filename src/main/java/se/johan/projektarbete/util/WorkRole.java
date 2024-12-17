@@ -1,6 +1,7 @@
 package se.johan.projektarbete.util;
 
 import java.sql.Date;
+import java.util.Objects;
 
 public class WorkRole {
     private int roleId;
@@ -68,5 +69,17 @@ public class WorkRole {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        WorkRole workRole = (WorkRole) o;
+        return roleId == workRole.roleId && Double.compare(salary, workRole.salary) == 0 && Objects.equals(title, workRole.title) && Objects.equals(workDescription, workRole.workDescription) && Objects.equals(creationDate, workRole.creationDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(roleId, title, workDescription, salary, creationDate);
     }
 }

@@ -73,12 +73,12 @@ public class LoginGUI {
             String email = emailTextField.getText();
             String password = passwordTextField.getText();
 
-            if (!Security.checkForBlancField(email) || !Security.checkForBlancField(password)) {
+            if (!Security.checkForBlancField(email) && !Security.checkForBlancField(password)) {
                 if (Security.checkForThreat(email) || Security.checkForThreat(password)) {
                     errorLabel.setText("Farliga tecken!");
                 } else {
                     errorLabel.setText("");
-                    if (!Security.checkThatUserExists(conn, pstmt, rs, email, /*Security.haschPassword(*/password)) {
+                    if (!Security.checkThatUserExists(conn, pstmt, rs, email, password)) {
                         errorLabel.setForeground(Color.RED);
                         errorLabel.setText("Användaren finns inte");
                     } else {

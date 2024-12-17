@@ -129,8 +129,6 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
             JDBCUtil.close(conn, pstmt, rs);
         }
         return workRoles;
-
-
     }
 
     //Klar
@@ -256,9 +254,12 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
 
             // Uppdaterad SQL-fråga som gör en JOIN mellan employee och work_role
             String sql = """
-                    SELECT employee.full_name, employee.email, work_role.title
+                    SELECT
+                        employee.full_name,
+                        employee.email,
+                        COALESCE(work_role.title, 'Saknar roll') AS title
                     FROM employee
-                    INNER JOIN work_role ON employee.role_id = work_role.role_id
+                    LEFT JOIN work_role ON COALESCE(employee.role_id, 0) = work_role.role_id
                     """;
 
             pstmt = conn.prepareStatement(sql);
@@ -401,7 +402,7 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
     }
 
 
-    public void createNewWorkRoleTest(Connection conn, String title, String workDescription, double salary, Date creationDate) {
+    public void createNewWorkRoleTest(Connection conn, WorkRole workRole) {
         PreparedStatement pstmt = null;
         try {
             String sql = """
@@ -410,16 +411,16 @@ public class WorkRoleAndEmployeeDAOImpl implements WorkRoleAndEmployeeDAO {
                     """;
 
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, title);
-            pstmt.setString(2, workDescription);
-            pstmt.setDouble(3, salary);
-            pstmt.setDate(4, creationDate);
+            pstmt.setString(1, workRole.getTitle());
+            pstmt.setString(2, workRole.getWorkDescription());
+            pstmt.setDouble(3, workRole.getSalary());
+            pstmt.setDate(4, workRole.getCreationDate());
 
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            JDBCUtil.close(pstmt); // Bara stäng PreparedStatement
+            JDBCUtil.close(pstmt);
         }
     }
 

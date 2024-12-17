@@ -282,6 +282,7 @@ public class AdminGUI {
         centerPanel.add(scrollPane, BorderLayout.CENTER);
 
         JButton backButton = new JButton("Tillbaka");
+        backButton.setFont(buttonFont);
         backButton.addActionListener(_ -> cardLayout.show(mainPanel, "workRolePanel"));
         centerPanel.add(backButton, BorderLayout.SOUTH);
 
@@ -329,6 +330,7 @@ public class AdminGUI {
         centerPanel.add(scrollPane, BorderLayout.CENTER);
 
         JButton backButton = new JButton("Tillbaka");
+        backButton.setFont(buttonFont);
         backButton.addActionListener(_ -> cardLayout.show(mainPanel, "employeePanel")
         );
         centerPanel.add(backButton, BorderLayout.SOUTH);
@@ -451,8 +453,6 @@ public class AdminGUI {
 
         for (int i = 0; i < employees.size(); i++) {
             Map<String, Object> employee = employees.get(i);
-
-
             tableData[i][0] = employee.get("full_name") != null ? (String) employee.get("full_name") : "Namn saknas";
             tableData[i][1] = employee.get("email") != null ? (String) employee.get("email") : "Email saknas";
             tableData[i][2] = employee.get("role_title") != null ? (String) employee.get("role_title") : "Roll saknas";

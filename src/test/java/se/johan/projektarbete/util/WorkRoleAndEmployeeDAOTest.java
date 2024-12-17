@@ -1,6 +1,7 @@
 package se.johan.projektarbete.util;
 
 import org.junit.jupiter.api.*;
+
 import java.sql.*;
 
 
@@ -16,19 +17,18 @@ class WorkRoleAndEmployeeDAOTest {
     public void setup() throws SQLException {
         // Skapa DAO och sätt upp en in-memory H2-databas
         dao = new WorkRoleAndEmployeeDAOImpl();
-        conn = DriverManager.getConnection("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1", "root", "");
-
+        conn = JDBCUtil.getConnection();
         // Skapa den tabell som krävs
         Statement stmt = conn.createStatement();
         stmt.execute("""
-            CREATE TABLE work_role (
-                role_id INT AUTO_INCREMENT PRIMARY KEY,
-                title VARCHAR(255) NOT NULL,
-                work_description TEXT NOT NULL,
-                salary DOUBLE NOT NULL,
-                creation_date DATE NOT NULL
-            );
-        """);
+                    CREATE TABLE work_role (
+                        role_id INT AUTO_INCREMENT PRIMARY KEY,
+                        title VARCHAR(255) NOT NULL,
+                        work_description TEXT NOT NULL,
+                        salary DOUBLE NOT NULL,
+                        creation_date DATE NOT NULL
+                    );
+                """);
     }
 
     @BeforeEach
@@ -39,13 +39,15 @@ class WorkRoleAndEmployeeDAOTest {
     @Test
     void createNewWorkRole() throws SQLException {
         // Dynamisk testdata
-        String title = "Software Engineer " + System.currentTimeMillis();
-        String workDescription = "Develop and maintain software applications.";
+        String title = "Test " + System.currentTimeMillis();
+        String workDescription = "Testa en testmetod";
         double salary = 60000.0;
         Date creationDate = new Date(System.currentTimeMillis());
 
+        WorkRole workRole = new WorkRole(title, workDescription, salary, creationDate);
+
         // Anropa metoden som ska testas
-        dao.createNewWorkRoleTest(conn, title, workDescription, salary, creationDate);
+        dao.createNewWorkRoleTest(conn, workRole);
 
 
         // Verifiera att datan har lagts till
@@ -61,7 +63,7 @@ class WorkRoleAndEmployeeDAOTest {
     }
 
     @AfterAll
-    public void cleanup() throws SQLException {
+    public void cleanup() {
         JDBCUtil.close(conn);
     }
 }

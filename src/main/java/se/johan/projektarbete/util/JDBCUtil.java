@@ -1,13 +1,27 @@
 package se.johan.projektarbete.util;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
+import java.util.Properties;
 
 public class JDBCUtil {
 
-    public static String getDatabaseProductName(Connection connection) throws SQLException {
-        DatabaseMetaData metadata = connection.getMetaData();
-        return metadata.getDatabaseProductName();
+    private static Properties properties = new Properties();
+
+
+    static {
+        try (InputStream input = JDBCUtil.class.getClassLoader().getResourceAsStream("application.properties")) {
+            if (input == null) {
+                throw new IOException("Unable to find application.properties");
+            }
+            properties.load(input);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new ExceptionInInitializerError("Failed to load database properties");
+        }
     }
+
 
     public static Connection getConnection() throws SQLException {
         // Registrera MySQL JDBC-drivrutinen
@@ -18,10 +32,9 @@ public class JDBCUtil {
         }
 
         // Skapa en URL till MySQL-databasen
-        String dbURL = "jdbc:mysql://localhost:3306/projektarbetedb";
-        // Ange användarnamn och lösenord
-        String userId = "root"; // Använd ditt användarnamn för MySQL
-        String password = "password";  // Använd ditt lösenord för MySQL
+        String dbURL = properties.getProperty("db.url");
+        String userId = properties.getProperty("db.user");
+        String password = properties.getProperty("db.password");
 
         // Använd metoden getConnection i DriverManager för att få en anslutning till databasen
         Connection conn = DriverManager.getConnection(dbURL, userId, password);

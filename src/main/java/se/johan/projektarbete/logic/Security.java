@@ -21,12 +21,6 @@ public class Security {
         return false;
     }
 
-   /* public static String haschPassword(String password) {
-        return String.valueOf(password.hashCode());
-    }
-
-    */
-
 
     public static boolean checkThatUserExists(Connection conn, PreparedStatement pstmt, ResultSet rs, String email, String password) {
         boolean userExists = false;

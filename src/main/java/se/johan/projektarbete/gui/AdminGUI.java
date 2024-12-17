@@ -7,13 +7,10 @@ import se.johan.projektarbete.logic.Security;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
-import java.sql.Date;
 import java.time.LocalDate;
 
 import static se.johan.projektarbete.util.WorkRoleAndEmployeeDAOImpl.checkForDuplicateTitle;
@@ -30,12 +27,14 @@ public class AdminGUI {
     static LocalDate currentDate = LocalDate.now();
     static JTable workRoleTable = new JTable();
     static JTable employeeTable = new JTable();
+    //WorkRole
     static JComboBox<String> roleComboBoxCreateNewEmployee = new JComboBox<>();
     static JComboBox<String> roleComboBoxDeleteWorkRole = new JComboBox<>();
     static JComboBox<String> roleComboBoxUpdateWorkRole = new JComboBox<>();
+    static JComboBox<String> roleComboBoxUpdateEmployee = new JComboBox<>();
+    //Employee
     static JComboBox<String> employeeComboBoxUpdateEmployee = new JComboBox<>();
     static JComboBox<String> employeeComboBoxDeleteEmployee = new JComboBox<>();
-    static JComboBox<String> roleComboBoxUpdateEmployee = new JComboBox<>();
 
     static JLabel errorLabel = new JLabel(" "); // Tomt mellanrum reserverar utrymme
 
@@ -91,7 +90,7 @@ public class AdminGUI {
         mainPanel.add(updateWorkRole(), "updateWorkRolePanel");
         mainPanel.add(updateEmployee(), "updateEmployeePanel");
 
-        // Lägg till alla paneler i fönstret
+        // Lägg till alla paneler i mainFrame
         mainFrame.add(upperPanel, BorderLayout.NORTH);
         mainFrame.add(mainPanel, BorderLayout.CENTER);
         mainFrame.add(lowerPanel, BorderLayout.SOUTH);
@@ -110,7 +109,10 @@ public class AdminGUI {
 
         // Buttons
         JButton createNewWorkRoleButton = new JButton("Ny roll");
-        createNewWorkRoleButton.addActionListener(_ -> cardLayout.show(mainPanel, "createWorkRolePanel"));
+        createNewWorkRoleButton.addActionListener(_ -> {
+            updateMethods();
+            cardLayout.show(mainPanel, "createWorkRolePanel");
+        });
         centerPanel.add(createNewWorkRoleButton);
 
         JButton deleteWorkRoleButton = new JButton("Ta bort roll");
@@ -129,7 +131,10 @@ public class AdminGUI {
 
         JButton showAllWorkRolesButton = new JButton("Visa alla roller");
         updateMethods();
-        showAllWorkRolesButton.addActionListener(_ -> cardLayout.show(mainPanel, "showAllWorkRolesPanel"));
+        showAllWorkRolesButton.addActionListener(_ -> {
+            updateMethods();
+            cardLayout.show(mainPanel, "showAllWorkRolesPanel");
+        });
         centerPanel.add(showAllWorkRolesButton);
         return centerPanel;
     }
@@ -339,35 +344,6 @@ public class AdminGUI {
         return centerPanel;
     }
 
-    private static void updateEmployeesTable() {
-        employeeTable.setModel(new DefaultTableModel());
-
-        // Hämta de senaste anställda
-        List<Map<String, Object>> employees = workRoleAndEmployeeDAO.showAllEmployees(conn, pstmt, rs);
-        String[] columns = {"Namn", "Email", "Roll"};
-        String[][] tableData = new String[employees.size()][columns.length];
-
-        for (int i = 0; i < employees.size(); i++) {
-            Map<String, Object> employee = employees.get(i);
-
-
-            tableData[i][0] = employee.get("full_name") != null ? (String) employee.get("full_name") : "Namn saknas";
-            tableData[i][1] = employee.get("email") != null ? (String) employee.get("email") : "Email saknas";
-            tableData[i][2] = employee.get("role_title") != null ? (String) employee.get("role_title") : "Roll saknas";
-        }
-
-        // Skapa en TableModel och gör alla celler skrivskyddade
-        DefaultTableModel model = new DefaultTableModel(tableData, columns) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // Sätter alla celler som icke-redigerbara
-            }
-        };
-
-        employeeTable.setModel(model); // Uppdaterar tabellen med den nya modellen
-    }
-
-
     private static JPanel createNewEmployeePanel() {
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new GridLayout(7, 1, 10, 10)); // Anpassad layout för fler komponenter
@@ -463,6 +439,37 @@ public class AdminGUI {
 
         return centerPanel;
     }
+
+
+    private static void updateEmployeesTable() {
+        employeeTable.setModel(new DefaultTableModel());
+
+        // Hämta de senaste anställda
+        List<Map<String, Object>> employees = workRoleAndEmployeeDAO.showAllEmployees(conn, pstmt, rs);
+        String[] columns = {"Namn", "Email", "Roll"};
+        String[][] tableData = new String[employees.size()][columns.length];
+
+        for (int i = 0; i < employees.size(); i++) {
+            Map<String, Object> employee = employees.get(i);
+
+
+            tableData[i][0] = employee.get("full_name") != null ? (String) employee.get("full_name") : "Namn saknas";
+            tableData[i][1] = employee.get("email") != null ? (String) employee.get("email") : "Email saknas";
+            tableData[i][2] = employee.get("role_title") != null ? (String) employee.get("role_title") : "Roll saknas";
+        }
+
+        // Skapa en TableModel och gör alla celler skrivskyddade
+        DefaultTableModel model = new DefaultTableModel(tableData, columns) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Sätter alla celler som icke-redigerbara
+            }
+        };
+
+        employeeTable.setModel(model); // Uppdaterar tabellen med den nya modellen
+    }
+
+
 
 
     private static void updateRoleComboBox(JComboBox<String> roleComboBox) {
@@ -593,8 +600,6 @@ public class AdminGUI {
         centerPanel.add(workRoleLabel);
 
         centerPanel.add(roleComboBoxUpdateWorkRole);
-
-
 
 
         // Arbetsbeskrivning

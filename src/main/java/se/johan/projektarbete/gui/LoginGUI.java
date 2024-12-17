@@ -82,8 +82,6 @@ public class LoginGUI {
                         errorLabel.setForeground(Color.RED);
                         errorLabel.setText("Användaren finns inte");
                     } else {
-                        //errorLabel.setForeground(Color.GREEN);
-                        //errorLabel.setText("Användare hittad!");
                         frame.dispose();
                     }
                 }

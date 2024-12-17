@@ -6,12 +6,6 @@ import java.awt.*;
 
 public class UtilGUI {
 
-    public static void createFrame(JFrame frame) {
-        // Skapa huvudfönstret
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 500);
-    }
-
     public static void createUpperPanel(JPanel panel) {
         //Skapa en upperPanel med FlowLayout
         JPanel upperPanel = new JPanel();
